@@ -1,65 +1,57 @@
-pragma solidity ^0.4.0;
-contract Ballot {
+   
 
-    struct Voter {
-        uint weight;
-        bool voted;
-        uint8 vote;
-        address delegate;
-    }
-    struct Proposal {
-        uint voteCount;
-    }
 
-    address chairperson;
-    mapping(address => Voter) voters;
-    Proposal[] proposals;
+contract eyecoin {
+    /* Public variables of the token */
+    string public standard = 'Token 0.1';
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    uint256 public initialSupply;
+    uint256 public totalSupply;
 
-    /// Create a new ballot with $(_numProposals) different proposals.
-    function Ballot(uint8 _numProposals) {
-        chairperson = msg.sender;
-        voters[chairperson].weight = 1;
-        proposals.length = _numProposals;
-    }
+    /* This creates an array with all balances */
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
 
-    /// Give $(voter) the right to vote on this ballot.
-    /// May only be called by $(chairperson).
-    function giveRightToVote(address voter) {
-        if (msg.sender != chairperson || voters[voter].voted) return;
-        voters[voter].weight = 1;
-    }
+  
+    /* Initializes contract with initial supply tokens to the creator of the contract */
+    function eyecoin() {
 
-    /// Delegate your vote to the voter $(to).
-    function delegate(address to) {
-        Voter sender = voters[msg.sender]; // assigns reference
-        if (sender.voted) return;
-        while (voters[to].delegate != address(0) && voters[to].delegate != msg.sender)
-            to = voters[to].delegate;
-        if (to == msg.sender) return;
-        sender.voted = true;
-        sender.delegate = to;
-        Voter delegate = voters[to];
-        if (delegate.voted)
-            proposals[delegate.vote].voteCount += sender.weight;
-        else
-            delegate.weight += sender.weight;
+         initialSupply = 30000000;
+         name ="eyecoin";
+        decimals = 2;
+         symbol = "eye";
+        
+        balanceOf[msg.sender] = initialSupply;              // Give the creator all initial tokens
+        totalSupply = initialSupply;                        // Update total supply
+                                   
     }
 
-    /// Give a single vote to proposal $(proposal).
-    function vote(uint8 proposal) {
-        Voter sender = voters[msg.sender];
-        if (sender.voted || proposal >= proposals.length) return;
-        sender.voted = true;
-        sender.vote = proposal;
-        proposals[proposal].voteCount += sender.weight;
+    /* Send coins */
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           // Check if the sender has enough
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; // Check for overflows
+        balanceOf[msg.sender] -= _value;                     // Subtract from the sender
+        balanceOf[_to] += _value;                            // Add the same to the recipient
+      
     }
 
-    function winningProposal() constant returns (uint8 winningProposal) {
-        uint256 winningVoteCount = 0;
-        for (uint8 proposal = 0; proposal < proposals.length; proposal++)
-            if (proposals[proposal].voteCount > winningVoteCount) {
-                winningVoteCount = proposals[proposal].voteCount;
-                winningProposal = proposal;
-            }
+   
+
+    
+
+   
+
+    /* This unnamed function is called whenever someone tries to send ether to it */
+    function () {
+        throw;     // Prevents accidental sending of ether
     }
 }
+
+
+
+
+
+
+
